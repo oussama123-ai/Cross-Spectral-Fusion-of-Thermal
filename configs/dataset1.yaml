@@ -1,0 +1,30 @@
+# configs/dataset1.yaml
+# Dataset 1: Controlled pain induction (Cold Pressor Test + pressure algometry)
+# n=50 healthy adults, ages 21–68, 87.3 h, 9.46 M frames
+
+defaults:
+  - default
+
+data:
+  dataset: "dataset1"
+  data_root: "data/features/dataset1"
+
+  # Dataset 1 specifics: continuous NRS slider at 1 Hz
+  label_frequency_hz: 1.0
+  pain_protocols: ["cold_pressor", "pressure_algometry"]
+
+  # Subject demographics
+  n_subjects: 50
+  age_range: [21, 68]
+  female_percent: 52.0
+
+  # Recording statistics
+  total_hours: 87.3
+  total_frames: 9460000
+  mean_nrs: 3.8
+  std_nrs: 2.6
+
+# Cross-validation splits (40 train / 10 test per fold)
+training:
+  cv_train_subjects: 40
+  cv_test_subjects: 10

@@ -1,0 +1,36 @@
+# configs/dataset2.yaml
+# Dataset 2: Clinical postoperative monitoring (PACU)
+# n=30 patients, ages 31–74, 17.7 h, 1.92 M frames
+
+defaults:
+  - default
+
+data:
+  dataset: "dataset2"
+  data_root: "data/features/dataset2"
+
+  # Dataset 2 specifics: NRS self-report every 2 minutes
+  label_frequency_hz: 0.00833      # 1 label per 120 s
+  label_interpolation: "linear"    # interpolate between 2-min NRS reports
+  pain_protocols: ["postoperative"]
+  surgical_types: ["appendectomy", "cholecystectomy", "hernia_repair"]
+
+  # Subject demographics
+  n_subjects: 30
+  age_range: [31, 74]
+  female_percent: 47.0
+
+  # Recording statistics
+  total_hours: 17.7
+  total_frames: 1920000
+  mean_nrs: 4.3
+  std_nrs: 2.4
+
+  # Clinical-specific settings
+  pacu_temperature_range: [20, 25]  # ambient temperature variation in PACU
+  occlusion_handling: "partial_face_ok"
+
+# Cross-validation splits (24 train / 6 test per fold)
+training:
+  cv_train_subjects: 24
+  cv_test_subjects: 6

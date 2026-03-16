@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Data (large files — use Zenodo / institutional storage)
+data/raw/
+data/features/
+*.npy
+*.mp4
+*.seq
+*.csq
+
+# Model checkpoints (large — share via request)
+experiments/
+*.pth
+*.pt
+*.ckpt
+
+# Results
+results/
+logs/
+tensorboard/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Config overrides with secrets
+configs/local.yaml

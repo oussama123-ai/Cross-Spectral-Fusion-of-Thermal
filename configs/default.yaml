@@ -1,0 +1,126 @@
+# configs/default.yaml
+# Default hyperparameters for CSAF+Transformer
+# Paper: Cross-Spectral Fusion of Thermal and RGB Imaging for Objective Pain Estimation
+
+# ── Data ──────────────────────────────────────────────────────────────────────
+data:
+  dataset: "combined"              # "dataset1" | "dataset2" | "combined"
+  data_root: "data/features"
+  num_workers: 8
+  pin_memory: true
+
+  # Video / temporal
+  fps: 30
+  window_frames: 300               # 10-second windows at 30 fps
+  window_stride: 150               # 50% overlap during training
+  window_stride_eval: 30           # 1-second stride during evaluation
+
+  # ROI settings
+  num_rois: 5                      # periorbital, forehead, nasal, cheeks, perioral
+  roi_size: 128                    # each ROI resized to 128×128
+
+  # NRS label settings
+  nrs_min: 0.0
+  nrs_max: 10.0
+  label_smoothing: 0.0
+
+  # Cross-validation
+  n_folds: 5
+  fold: 0                          # which fold to run (0-indexed)
+  stratify_by_intensity: true
+
+# ── Model ─────────────────────────────────────────────────────────────────────
+model:
+  # Encoders
+  encoder_arch: "resnet50"         # backbone for both modalities
+  encoder_feature_dim: 2048        # ResNet-50 global average pool output
+  rgb_pretrained: "imagenet+vggface2"   # "imagenet" | "imagenet+vggface2" | "none"
+  thermal_pretrained: "none"       # thermal encoder trained from scratch
+
+  # CSAF fusion
+  csaf:
+    d_key: 2048                    # attention key dimension (= encoder_feature_dim)
+    dropout: 0.1
+    bidirectional: true            # bidirectional cross-attention
+    adaptive_gating: true          # learned per-ROI modality weights
+
+  # Temporal Transformer
+  temporal_transformer:
+    d_model: 512
+    n_layers: 6
+    n_heads: 8
+    d_ff: 2048                     # feed-forward dimension
+    dropout: 0.1
+    max_seq_len: 300               # max temporal positions
+
+  # Regression head
+  regression_head:
+    hidden_dims: [512, 512]
+    dropout: 0.2
+    activation: "gelu"
+    output_activation: "sigmoid"   # scale to [0,1], then ×10
+
+# ── Training ──────────────────────────────────────────────────────────────────
+training:
+  strategy: "three_stage"          # "three_stage" | "end_to_end"
+
+  # Stage 1: modal encoder pre-training
+  stage1:
+    epochs: 20
+    lr: 1.0e-4
+    freeze_other: false
+
+  # Stage 2: CSAF fusion (encoders frozen)
+  stage2:
+    epochs: 30
+    lr: 1.0e-4
+    freeze_encoders: true
+
+  # Stage 3: end-to-end fine-tuning
+  stage3:
+    epochs: 50
+    lr: 1.0e-5                     # lower LR for fine-tuning
+
+  # Shared optimizer settings
+  optimizer: "adamw"
+  weight_decay: 1.0e-4
+  lr_scheduler: "cosine"
+  warmup_epochs: 5
+  batch_size: 16
+  grad_clip_max_norm: 1.0
+
+  # Loss
+  loss:
+    mae_weight: 1.0
+    smooth_weight: 0.1             # smoothness regularisation
+    ordinal_weight: 0.05           # ordinal ranking loss
+
+  # Misc
+  seed: 42
+  amp: true                        # automatic mixed precision
+  gradient_checkpointing: false
+  save_every_n_epochs: 10
+  val_every_n_epochs: 1
+
+# ── Hardware ──────────────────────────────────────────────────────────────────
+hardware:
+  gpus: 4                          # number of GPUs (DDP)
+  gpu_ids: [0, 1, 2, 3]
+  distributed_backend: "nccl"
+
+# ── Evaluation ────────────────────────────────────────────────────────────────
+evaluation:
+  metrics: ["mae", "rmse", "pcc", "icc", "accuracy_3class"]
+  bootstrap_samples: 1000
+  pain_intensity_bins:
+    low: [0, 3]
+    moderate: [4, 6]
+    high: [7, 10]
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging:
+  log_dir: "logs"
+  tensorboard: true
+  log_attention_maps: true
+  log_modality_weights: true
+  log_interval: 50                 # steps
