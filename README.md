@@ -266,21 +266,6 @@ Contact: **salnawali@kfu.edu.sa**
 
 ---
 
-## Citation
-
-If you use this code, please cite:
-
-```bibtex
-@article{elothmani2026crossspectral,
-  title   = {Cross-Spectral Fusion of Thermal and {RGB} Imaging for Objective Pain Estimation},
-  author  = {El Othmani, Oussama and Naouali, Sami},
-  journal = {PLOS Digital Health},
-  year    = {2026},
-  doi     = {10.1371/journal.pdig.XXXXXXX}
-}
-```
-
----
 
 ## License
 
